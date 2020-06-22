@@ -1,0 +1,268 @@
+library(dplyr)
+library(jsonlite)
+library(geojsonio)
+library(leaflet)
+#library(rgdal)/Users/reshzevarma/Desktop/server.R
+
+
+df <- read.csv("Dataset.csv", header = T)
+
+# From http://data.okfn.org/data/datasets/geo-boundaries-world-110m
+geojson<- geojsonio::geojson_read("countries.geojson",what = "sp")
+#u <- "https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson"
+#downloader::download(url = u, destfile = "countries.GeoJSON")
+#geojson <- readOGR("countries.GeoJSON", layer = "sp")
+Country <-as.character(geojson$admin)
+pop_est <-as.numeric(as.character(geojson$pop_est))
+
+#Segregate Country and Popdata from list
+my_df<-cbind(Country,pop_est)
+my_df<-as.data.frame(my_df)
+my_df$pop_est<-as.numeric(as.character(my_df$pop_est))
+my_df$Country<-as.character(my_df$Country)
+
+df_map<-left_join(my_df,df, by="Country")
+
+
+# Add the now-styled GeoJSON object to the map
+bins<-seq(0,1,by=0.1)
+pal <- colorBin(palette = c("Red","yellow","green"), domain = c(0,1), bins = bins)
+
+Africa <- c(
+  'Tanzania',
+  'Seychelles',
+  "Libya",
+  "Eswatini",
+  "Algeria",
+  "Angola",
+  "Benin",
+  "Botswana",
+  "Burkina Faso",
+  "Burundi",
+  'Cabo Verde',
+  "Cameroon",
+  "Central African Republic",
+  "Chad",
+  "Comoros",
+  "Congo",
+  "Cote d'Ivoire",
+  "Equatorial Guinea",
+  "Eritrea",
+  "Ethiopia",
+  "Gabon",
+  "The Gambia",
+  "Ghana",
+  "Guinea",
+  "Guinea-Bissau",
+  "Kenya",
+  "Lesotho",
+  "Liberia",
+  "Madagascar",
+  "Malawi",
+  "Mali",
+  "Mauritania",
+  "Mauritius",
+  "Mozambique",
+  "Namibia",
+  "Niger",
+  "Nigeria",
+  "Rwanda",
+  "Sao Tome and Principe",
+  "Senegal",
+  "Sierra Leone",
+  "South Africa",
+  "Togo",
+  "Uganda",
+  "Zambia",
+  "Zimbabwe"
+)
+
+Americas <- c(
+  'Virgin Islands',
+  'Venezuela',
+  'Turks and Caicos Islands',
+  'Saint Martin',
+  'Saint Kitts and Nevis',
+  'Sint Maarten',
+  'Puerto Rico',
+  'Greenland',
+  'Cayman Islands',
+  'Bolivia',
+  'Antigua and Barbuda',
+  "Argentina",
+  "Bahamas",
+  "Barbados",
+  "Belize",
+  "Brazil",
+  "Canada",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Dominican Republic",
+  "Ecuador",
+  "El Salvador",
+  "Grenada",
+  "Guatemala",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Jamaica",
+  "Mexico",
+  "Nicaragua",
+  "Panama",
+  "Paraguay",
+  "Peru",
+  "Saint Lucia",
+  "Saint Vincent and the Grenadines",
+  "Suriname",
+  "Trinidad and Tobago",
+  "United States",
+  "Uruguay"
+)
+
+Eastern_Mediterranean <- c(
+  'Iran',
+  'Afghanistan',
+  'Bahrain',
+  'Djibouti',
+  'Egypt',
+  'Iraq',
+  'Jordan',
+  'Kuwait',
+  'Lebanon',
+  'Morocco',
+  'Oman',
+  'Pakistan',
+  'Qatar',
+  'Palestine',
+  'Saudi Arabia',
+  'Somalia',
+  'South Sudan',
+  'Sudan',
+  'Syria',
+  'Tunisia',
+  'United Arab Emirates',
+  'Yemen'
+)
+
+Europe <- c(
+  'United Kingdom',
+  'San Marino',
+  'North Macedonia',
+  'Monaco',
+  'Moldova',
+  'Liechtenstein',
+  'Kosovo',
+  'Isle of Man',
+  'Faroe Islands',
+  'Czech Republic',
+  'Channel Islands',
+  'Albania',
+  'Armenia',
+  'Andorra',
+  'Austria',
+  'Azerbaijan',
+  'Belarus',
+  'Belgium',
+  'Bosnia',
+  'Bulgaria',
+  'Croatia',
+  'Cyprus',
+  'Denmark',
+  'Estonia',
+  'Finland',
+  'France',
+  'Georgia',
+  'Germany',
+  'Greece',
+  'Hungary',
+  'Iceland',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Kazakhstan',
+  'Latvia',
+  'Lithuania',
+  'Luxembourg',
+  'Malta',
+  'Montenegro',
+  'Netherlands',
+  'Norway',
+  'Poland',
+  'Portugal',
+  'Romania',
+  'Russia',
+  'Serbia',
+  'Slovak Republic',
+  'Slovenia',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'Tajikistan',
+  'Turkey',
+  'Turkmenistan',
+  'Ukraine',
+  'Uzbekistan'
+)
+
+South_East_Asia <-c(
+  'Kyrgyz Republic',
+  'Bangladesh',
+  'Bhutan',
+  'India',
+  'Indonesia',
+  'Maldives',
+  'Myanmar',
+  'Nepal',
+  'Sri Lanka',
+  'Thailand',
+  'North Korea',
+  'South Korea',
+  'East Timor'
+)
+
+Western_Pacific <- c(
+  'Tuvalu',
+  'Palau',
+  'New Caledonia',
+  'Northern Mariana Islands',
+  'Micronesia',
+  'Marshall Islands',
+  'Guam',
+  'French Polynesia',
+  'Hong Kong',
+  'Macao',
+  'Australia',
+  'Brunei',
+  'Cambodia',
+  'China',
+  'Fiji',
+  'Japan',
+  'Kiribati',
+  'Lao PDR',
+  'Malaysia',
+  'Mongolia',
+  'New Zealand',
+  'Papua New Guinea',
+  'Philippines',
+  'Samoa',
+  'Singapore',
+  'Solomon Islands',
+  'Tonga',
+  'Vanuatu',
+  'Vietnam'
+)
+
+df_cont <- plyr::mapvalues(df$Country, Africa , rep("Africa",46))
+df_cont <- plyr::mapvalues(df_cont, Americas , rep("Americas",41))
+df_cont <- plyr::mapvalues(df_cont, Eastern_Mediterranean , rep("Eastern Mediterranean",22))
+df_cont <- plyr::mapvalues(df_cont, Europe , rep("Europe",57))
+df_cont <- plyr::mapvalues(df_cont, South_East_Asia , rep("South East Asia",13))
+df_cont <- plyr::mapvalues(df_cont, Western_Pacific , rep("Western Pacific",29))
+
+
+df_plot = cbind(df, df_cont)
+df_plot = df_plot[-1]
+
+

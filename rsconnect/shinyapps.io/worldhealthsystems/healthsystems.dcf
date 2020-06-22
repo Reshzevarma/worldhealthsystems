@@ -1,0 +1,13 @@
+name: healthsystems
+title: healthsystems
+username:
+account: worldhealthsystems
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2486675
+bundleId: 3300268
+url: https://worldhealthsystems.shinyapps.io/healthsystems/
+when: 1592797029.17934
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: gomap.js
